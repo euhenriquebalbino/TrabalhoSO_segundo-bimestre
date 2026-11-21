@@ -1,0 +1,520 @@
+\documentclass[12pt,a4paper,oneside]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazilian]{babel}
+\usepackage{geometry}
+\geometry{left=3cm,right=2cm,top=3cm,bottom=2cm}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{indentfirst}
+\setlength{\parindent}{1.25cm}
+\emergencystretch=2em
+\usepackage{graphicx,xcolor,booktabs,array,longtable,listings,tikz,pgfplots,caption,hyperref,enumitem,float}
+\pgfplotsset{compat=1.18}
+\hypersetup{colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue}
+\setlist{itemsep=2pt,topsep=4pt}
+\definecolor{codebg}{RGB}{247,247,244}
+\definecolor{codeframe}{RGB}{210,210,205}
+\lstdefinestyle{terminal}{backgroundcolor=\color{codebg},frame=single,rulecolor=\color{codeframe},basicstyle=\ttfamily\small,breaklines=true,keepspaces=true,showstringspaces=false,columns=fullflexible,upquote=true,inputencoding=utf8,extendedchars=true,
+  literate={á}{{\'a}}1 {à}{{\`a}}1 {â}{{\^a}}1 {ã}{{\~a}}1 {Á}{{\'A}}1 {À}{{\`A}}1 {Â}{{\^A}}1 {Ã}{{\~A}}1
+           {é}{{\'e}}1 {ê}{{\^e}}1 {É}{{\'E}}1 {Ê}{{\^E}}1
+           {í}{{\'i}}1 {Í}{{\'I}}1 {ó}{{\'o}}1 {ô}{{\^o}}1 {õ}{{\~o}}1 {Ó}{{\'O}}1 {Ô}{{\^O}}1 {Õ}{{\~O}}1
+           {ú}{{\'u}}1 {Ú}{{\'U}}1 {ç}{{\c{c}}}1 {Ç}{{\c{C}}}1}
+\lstset{style=terminal}
+
+% Sem captura ainda, o PDF mostra um quadro com o nome de arquivo esperado.
+\newcommand{\evidencia}[3]{%
+  \begin{figure}[H]\centering
+    \IfFileExists{#1}{\includegraphics[width=0.92\textwidth,height=0.58\textheight,keepaspectratio]{#1}}{\fbox{\begin{minipage}[c][4cm][c]{0.86\textwidth}\centering\textbf{Captura pendente}\\[4pt]Salve a evidência como\\[2pt]\texttt{#1}\end{minipage}}}
+    \caption{#2}\label{#3}
+  \end{figure}%
+}
+\newcommand{\integrantes}{Henrique de Paula Balbino\\Luan Araujo de Oliveira\\Pedro Lucas Oliveira Comper}
+\newcommand{\comando}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\fonte}[1]{\caption*{Fonte: #1}}
+
+\begin{document}
+\hypersetup{pageanchor=false}
+\begin{titlepage}
+\centering
+{\large UNIVERSIDADE VILA VELHA\par}
+\vspace{0.3cm}{\large Graduação em Ciência da Computação\par}{\large Sistemas Operacionais\par}
+\vfill
+% Ilustração vetorial original da relação entre hardware, kernel e programas.
+\begin{tikzpicture}[scale=0.9]
+  \draw[line width=1.2pt,rounded corners=8pt,fill=blue!5] (-3.1,-1.8) rectangle (3.1,1.8);
+  \draw[line width=1.2pt,fill=white] (-2.65,-1.25) rectangle (2.65,1.25);
+  \draw[line width=1pt,fill=gray!25] (-0.55,-1.8) -- (-0.8,-2.25) -- (0.8,-2.25) -- (0.55,-1.8) -- cycle;
+  \draw[line width=1pt,fill=gray!35] (-1.35,-2.3) rectangle (1.35,-2.48);
+  \node[draw,rounded corners,fill=blue!12,minimum width=3.9cm,minimum height=0.58cm] at (0,0.68) {Hardware};
+  \node[draw,rounded corners,fill=green!12,minimum width=3.9cm,minimum height=0.58cm] at (0,0) {Kernel do sistema operacional};
+  \node[draw,rounded corners,fill=orange!18,minimum width=3.9cm,minimum height=0.58cm] at (0,-0.68) {Processos e aplicações};
+  \draw[->,thick] (-2.1,0.38) -- (-2.1,-0.38);\draw[->,thick] (2.1,-0.38) -- (2.1,0.38);
+\end{tikzpicture}
+\vspace{0.4cm}
+
+{\Large\bfseries CONCEITOS DE SISTEMAS OPERACIONAIS E LINUX\par}
+\vspace{0.3cm}{\large Projeto do segundo bimestre\par}
+\vfill{\large\integrantes\par}
+\vfill Vila Velha, ES\par \today
+\end{titlepage}
+
+\hypersetup{pageanchor=true}
+\pagenumbering{roman}
+
+\thispagestyle{empty}
+\begin{center}
+{\large UNIVERSIDADE VILA VELHA\par}\vspace{0.2cm}
+{\large Ciência da Computação -- Sistemas Operacionais\par}\vspace{2cm}
+{\large\integrantes\par}\vspace{2.5cm}
+{\Large\bfseries Conceitos de Sistemas Operacionais e Linux\par}\vspace{0.4cm}
+Projeto do segundo bimestre
+\end{center}
+\vspace{1.5cm}
+\begin{flushright}\begin{minipage}{0.55\textwidth}
+Trabalho acadêmico apresentado à Universidade Vila Velha como parte das atividades da disciplina de Sistemas Operacionais.\\[0.4cm]
+Professor: Jean-Rémi Bourguet.
+\end{minipage}\end{flushright}
+\vfill\begin{center}Vila Velha, ES\\\today\end{center}
+\clearpage
+
+\thispagestyle{empty}\vspace*{5cm}
+\begin{flushright}\textit{“Grandes poderes trazem grandes responsabilidades.”}\\(Epígrafe popular)\end{flushright}
+\clearpage
+
+\section*{Resumo}
+Este trabalho apresenta conceitos fundamentais de sistemas operacionais com ênfase em Linux. São descritos o processo de inicialização, a comunicação com dispositivos de entrada e saída, o armazenamento secundário e o particionamento, os sistemas de arquivos, o controle de usuários e permissões, o gerenciamento de processos e a memória principal. A parte prática reúne as atividades indicadas nos capítulos 6 e 7 de \textit{Introdução ao Linux}: comandos de consulta e monitoramento, tarefas em segundo plano, agendamento de backup, scripts de validação, busca em arquivos, contagem de texto e menu interativo. Para cada atividade são apresentados comandos reproduzíveis, a finalidade da execução e um espaço reservado para evidência. Os resultados das execuções devem ser registrados pelo grupo; este documento não atribui resultados a comandos que ainda não foram executados.
+
+\noindent\textbf{Palavras-chave}: sistemas operacionais; Linux; processos; sistemas de arquivos; memória.
+\clearpage
+\tableofcontents\clearpage
+\listoffigures\clearpage
+\listoftables\clearpage
+\pagenumbering{arabic}
+
+\section{Introdução}
+O sistema operacional coordena processadores, memória, armazenamento e dispositivos, além de oferecer serviços para os programas e mecanismos de proteção entre usuários e processos. Conhecer essas funções ajuda a explicar como tarefas comuns no Linux -- iniciar o computador, ler um arquivo ou executar um programa -- dependem de diferentes camadas de software e hardware \cite{silberschatz,tanenbaum,arpaci}.
+
+O documento está dividido em duas partes. A primeira descreve os sete temas do plano da disciplina, incluindo gerenciamento de entrada e saída. A segunda apresenta as dez atividades pedidas no enunciado: sete do capítulo 6 (6.1, 6.2, 6.3, 6.4, 6.8, 6.9 e 6.10) e três do capítulo 7 (7.6, 7.9 e 7.11). Os blocos indicam procedimentos a executar, e os quadros de evidência informam os nomes padronizados das capturas a inserir em \texttt{images/}.
+
+\part{Conceitos de sistemas operacionais}
+\section{Processo de boot}
+Boot é a sequência que leva o computador do estado desligado até a execução do sistema operacional. No início, o firmware inicializa componentes essenciais e seleciona um carregador; o carregador prepara e transfere o controle ao kernel. Em sistemas atuais, o firmware pode operar em modo UEFI ou em compatibilidade com BIOS legado. A especificação UEFI define o gerenciador de boot e a seleção de aplicações de inicialização por variáveis persistidas em NVRAM\footnote{Especificação UEFI 2.11: \url{https://uefi.org/specs/UEFI/2.11/03_Boot_Manager.html}.}.
+
+\subsection{Etapas da inicialização}
+\begin{enumerate}
+\item O firmware realiza verificações e inicializações básicas dos dispositivos.
+\item O firmware escolhe uma opção de inicialização segundo sua configuração.
+\item Em BIOS legado, o fluxo tradicional começa pelo código de boot do MBR; em UEFI, o firmware pode carregar um executável EFI a partir da ESP.
+\item Um carregador, como GRUB, seleciona a entrada e carrega o kernel e, quando necessário, uma imagem \textit{initramfs}.
+\item O kernel inicializa drivers e subsistemas, monta o sistema de arquivos raiz e inicia o primeiro processo de espaço de usuário.
+\end{enumerate}
+O MBR combina código de inicialização e tabela de partições em um setor tradicional de 512 bytes. A ESP é uma partição do esquema GPT, normalmente FAT, que armazena executáveis de inicialização EFI. BIOS e UEFI descrevem interfaces de firmware distintas; UEFI não depende necessariamente de GPT em todas as configurações, embora essa combinação seja comum \cite{uefi,tanenbaum}.
+
+\section{Gerenciamento de entrada e saída}
+O subsistema de entrada e saída (E/S ou I/O) conecta processos a dispositivos como discos, teclados, interfaces de rede e terminais. O sistema operacional oferece uma interface uniforme, enquanto drivers traduzem operações genéricas em comandos específicos do controlador. A conclusão de operações pode ser comunicada por interrupções; DMA permite transferir blocos entre dispositivo e memória com menor intervenção contínua da CPU \cite{silberschatz,linuxblk}.
+
+\subsection{Camadas e técnicas}
+\begin{itemize}
+\item \textbf{Driver e controlador}: o driver configura e acompanha o dispositivo; o controlador executa as operações de hardware.
+\item \textbf{Interrupção}: sinaliza eventos, como conclusão de leitura, para que a CPU trate o evento sem consultar continuamente o dispositivo.
+\item \textbf{DMA}: transfere dados entre dispositivo e memória principal; reduz cópias e trabalho da CPU em operações adequadas.
+\item \textbf{Buffering e cache}: acomodam diferenças de velocidade e evitam algumas operações físicas repetidas.
+\item \textbf{Escalonamento}: organiza solicitações concorrentes. O Linux usa filas de blocos e políticas que dependem do dispositivo; unidades modernas podem processar múltiplas filas em paralelo\footnote{Documentação do kernel Linux sobre filas multiqueue: \url{https://docs.kernel.org/block/blk-mq.html}.}.
+\end{itemize}
+Uma requisição de leitura percorre o caminho aplicação, chamada de sistema, sistema de arquivos, camada de blocos, driver e dispositivo; os dados retornam à aplicação após a conclusão. Em dispositivos de armazenamento, o desempenho depende tanto da latência quanto da concorrência e do padrão de acesso. Por isso, maior atividade de CPU não significa necessariamente maior atividade de disco.
+
+\begin{table}[htbp]\centering
+\caption{Exemplos de mecanismos de entrada e saída}\label{tab:mecanismos-io}
+\begin{tabular}{>{\raggedright\arraybackslash}p{3cm}p{5cm}p{5cm}}
+\toprule Mecanismo & Função & Exemplo de efeito\\\midrule
+Interrupção & Notifica a CPU sobre eventos do dispositivo & Libera a CPU para outras tarefas enquanto a operação aguarda\\
+DMA & Move blocos entre memória e dispositivo & Reduz a intervenção da CPU em transferências grandes\\
+Buffer & Mantém dados temporariamente em memória & Agrupa ou desacopla operações de leitura e escrita\\
+Escalonador de E/S & Ordena solicitações pendentes & Pode melhorar vazão ou latência conforme a carga\\\bottomrule
+\end{tabular}\end{table}
+
+\section{Memória secundária e partições}
+Memória secundária é armazenamento não volátil destinado a dados e programas. HDDs armazenam informação em superfícies magnéticas e envolvem movimento mecânico; SSDs usam memória flash e não possuem partes móveis. HDDs são descritos por pratos, trilhas e setores, embora o sistema operacional geralmente enderece blocos por LBA. Em SSDs, páginas são unidades de leitura e blocos de apagamento; o controlador realiza operações de tradução e nivelamento de desgaste. NVMe é uma interface para dispositivos não voláteis, frequentemente conectados por PCIe \cite{patterson,nvme}.
+
+\subsection{Esquemas de partição}
+Uma tabela de partições divide um dispositivo em regiões lógicas. MBR limita a tabela tradicional a quatro entradas primárias e usa endereçamento de 32 bits em setores, o que resulta no limite usual de aproximadamente 2 TiB com setores de 512 bytes. GPT mantém cópia de estruturas importantes e verificações de integridade; o número de entradas depende da implementação. Na prática Linux, \comando{lsblk}, \comando{fdisk} e \comando{parted} ajudam a consultar ou administrar dispositivos e partições. Alterações de partição podem destruir dados e exigem identificar corretamente o dispositivo.
+
+\begin{table}[htbp]\centering
+\caption{Comparação resumida entre HDD, SSD, MBR e GPT}\label{tab:armazenamento-particoes}
+\begin{tabular}{>{\raggedright\arraybackslash}p{3cm}p{5cm}p{5cm}}
+\toprule Item & Organização & Característica relevante\\\midrule
+HDD & Pratos, trilhas e setores & Latência mecânica e acesso sensível à posição\\
+SSD & Flash, páginas e blocos & Sem partes móveis; apagamento ocorre por blocos\\
+MBR & Tabela no início do disco & Quatro entradas primárias; limite tradicional próximo a 2 TiB\\
+GPT & Cabeçalho principal e cópia de segurança & Identificadores GUID e verificação de integridade\\\bottomrule
+\end{tabular}\end{table}
+
+\subsection{Consulta segura no Linux}
+Os comandos abaixo consultam a topologia e os sistemas de arquivos montados; não alteram partições. A saída depende do computador usado.
+\begin{lstlisting}[language=bash,caption={Consulta de discos e pontos de montagem},label={lst:discos}]
+lsblk -o NAME,TYPE,SIZE,FSTYPE,MOUNTPOINTS
+df -hT
+\end{lstlisting}
+O primeiro comando exibe dispositivos, tipos, tamanhos e montagens; o segundo resume espaço usado e disponível nos sistemas de arquivos montados.
+
+\section{Gerenciamento de arquivos em sistemas de arquivos}
+Um sistema de arquivos organiza nomes, diretórios, dados e metadados sobre um dispositivo ou volume. No Linux, a camada VFS oferece operações comuns a diferentes sistemas de arquivos. Em sistemas do tipo Unix, um inode registra metadados e referências aos blocos de dados; nomes e diretórios associam componentes do caminho aos objetos correspondentes \cite{love,arpaci}.
+
+\subsection{Metadados, montagem e integridade}
+Metadados podem incluir tipo, proprietário, permissões, tamanho e horários. O comando \comando{mount} associa um sistema de arquivos a um diretório da árvore global. O arquivo \comando{/etc/fstab} descreve montagens persistentes. Sistemas como ext4 mantêm um diário de operações para auxiliar a recuperação de consistência; Btrfs e ZFS usam técnicas de cópia na gravação em partes de sua arquitetura. A literatura sobre sistemas de arquivos inclui propostas de organização em log, como a de Rosenblum e Ousterhout \cite{rosenblum}. Essas características não substituem cópias de segurança.
+
+\subsection{Operações de consulta}
+\begin{lstlisting}[language=bash,caption={Consulta do sistema de arquivos e metadados},label={lst:arquivos}]
+findmnt
+stat -- arquivo.txt
+df -hT .
+\end{lstlisting}
+\comando{findmnt} apresenta montagens, \comando{stat} consulta metadados do caminho indicado e \comando{df} mostra espaço do sistema de arquivos que contém o diretório atual. Substitua \comando{arquivo.txt} por um arquivo existente.
+
+\section{Grupos, usuários, poderes e permissões}
+Cada usuário local possui um UID; grupos possuem GIDs. O arquivo \comando{/etc/passwd} registra informações de conta, incluindo diretório e shell de login, enquanto informações de senha protegidas ficam em outro banco, normalmente \comando{/etc/shadow}. Os comandos \comando{id}, \comando{getent}, \comando{useradd}, \comando{usermod} e \comando{passwd} consultam ou administram contas, conforme as permissões disponíveis.
+
+\subsection{Permissões tradicionais}
+Para arquivos e diretórios, as permissões básicas são leitura (r), escrita (w) e execução (x), aplicadas às classes proprietário, grupo e outros. Em diretórios, leitura permite listar nomes, escrita permite modificar entradas (sujeita às demais permissões) e execução permite atravessar ou pesquisar o diretório.
+\begin{table}[htbp]\centering
+\caption{Valores octais das permissões básicas}\label{tab:permissoes}
+\begin{tabular}{ccc}\toprule Símbolo & Valor & Significado\\\midrule
+--- & 0 & Nenhuma permissão\\--x & 1 & Execução\\-w- & 2 & Escrita\\-wx & 3 & Escrita e execução\\r-- & 4 & Leitura\\r-x & 5 & Leitura e execução\\rw- & 6 & Leitura e escrita\\rwx & 7 & Leitura, escrita e execução\\\bottomrule\end{tabular}\end{table}
+O modo \comando{chmod 640 arquivo} atribui leitura e escrita ao proprietário, leitura ao grupo e nenhuma permissão a outros. \comando{sudo} permite executar comandos autorizados com outra identidade, segundo a política configurada; não deve ser usado automaticamente para contornar erros de permissão.
+\begin{lstlisting}[language=bash,caption={Inspeção de identidade e permissões},label={lst:permissoes}]
+id
+ls -l -- arquivo.txt
+namei -l -- /caminho/para/arquivo.txt
+\end{lstlisting}
+Os comandos mostram IDs, permissões do arquivo e permissões dos componentes do caminho. Troque os caminhos de exemplo por itens existentes.
+
+\section{Gerenciamento de processos}
+Processo é uma instância de programa em execução. O kernel mantém informações de controle, como identificador (PID), credenciais, estado, registradores salvos e recursos abertos. O PPID identifica o processo pai. Um escalonador compartilha o processador entre tarefas elegíveis por meio de trocas de contexto. Estados comuns incluem execução, pronto para executar e espera por evento ou recurso \cite{silberschatz,tanenbaum}.
+\begin{table}[htbp]\centering
+\caption{Estados comuns de processos}\label{tab:estados-processo}
+\begin{tabular}{>{\raggedright\arraybackslash}p{3cm}p{10cm}}\toprule Estado & Descrição\\\midrule
+Executando (R) & Está usando a CPU ou aguardando na fila de execução\\
+Dormindo interrompível (S) & Aguarda evento e pode responder a sinais\\
+Dormindo não interrompível (D) & Aguarda condição do kernel, frequentemente E/S\\
+Parado (T) & Suspenso por sinal ou depuração\\
+Zumbi (Z) & Terminou, mas ainda aguarda o processo pai recolher seu estado\\\bottomrule\end{tabular}\end{table}
+\subsection{Consulta e monitoramento}
+\begin{lstlisting}[language=bash,caption={Consulta de processos e árvore de processos},label={lst:processos}]
+ps -eo pid,ppid,state,comm --sort=pid
+pstree -p
+top
+\end{lstlisting}
+\comando{ps} fornece uma fotografia dos processos; \comando{pstree} mostra relações pai-filho; \comando{top} atualiza uma visão interativa. A tecla \comando{q} encerra \comando{top}. Os valores observados variam conforme os programas e a carga no momento.
+
+\section{Gerenciamento da memória primária}
+Memória principal (RAM) mantém temporariamente instruções e dados usados pelos processos. A hierarquia inclui registradores, caches e DRAM, com compromissos entre capacidade, custo e latência. O sistema operacional usa endereços virtuais e a MMU para traduzir acessos para endereços físicos e isolar espaços de processos. Paginação divide endereços em unidades de tamanho fixo; memória virtual permite mapear páginas sob demanda. Quando há pressão de memória, o kernel pode recuperar páginas e usar swap, com custo muito maior que RAM \cite{tanenbaum,arpaci}.
+
+\subsection{Hierarquia ilustrativa de latência}
+As ordens de grandeza da Figura~\ref{fig:latencias} são valores didáticos e dependem da arquitetura, do dispositivo e da carga. A escala logarítmica mostra por que uma falta de página que exige acesso ao armazenamento pode ser muito mais custosa do que um acesso à DRAM.
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}\begin{axis}[
+ ybar,width=0.86\textwidth,height=7cm,
+ ylabel={Latência aproximada (ns, escala logarítmica)},
+ symbolic x coords={Cache L1,DRAM,SSD,HDD},xtick=data,ymode=log,ymin=1,ymax=100000000,
+ nodes near coords,nodes near coords style={font=\small},x tick label style={font=\small},grid=major,bar width=20pt]
+\addplot[fill=blue!45] coordinates {(Cache L1,1) (DRAM,100) (SSD,100000) (HDD,10000000)};
+\end{axis}\end{tikzpicture}
+\caption{Ordens de grandeza ilustrativas de latência entre níveis de memória e armazenamento.}\label{fig:latencias}
+\fonte{Elaboração própria, com valores aproximados para comparação conceitual \cite{patterson,arpaci}.}
+\end{figure}
+\subsection{Comandos para observar memória}
+\begin{lstlisting}[language=bash,caption={Consulta de memória e swap},label={lst:memoria}]
+free -h
+vmstat 1 5
+\end{lstlisting}
+\comando{free -h} resume memória e swap. \comando{vmstat 1 5} apresenta cinco amostras com intervalo de um segundo; colunas como \comando{si} e \comando{so} indicam atividade de entrada e saída de swap. Os números devem ser descritos somente após executar os comandos no computador do grupo.
+
+\part{Atividades práticas: capítulos 6 e 7}
+As instruções a seguir cobrem as dez atividades selecionadas no enunciado. Execute-as em uma conta Linux comum, adaptando caminhos quando necessário. Os resultados apresentados são expectativas de comportamento, não saídas já obtidas. Faça as capturas com o nome de usuário visível no prompt e armazene-as com os nomes indicados em \texttt{images/}.
+
+\section{Capítulo 6 -- Shell}
+\subsection{Atividade 6.1 -- Processos no estado R e monitoramento}
+\textbf{Objetivo.} Pesquisar opções de \comando{ps}, listar PID e nome dos processos no estado R, experimentar \comando{top} e relacionar carga de processos com atividade de armazenamento.
+
+\textbf{Procedimento.} Execute a listagem e abra o monitor duas vezes, ordenando por CPU e por memória. Em \comando{top}, use \comando{q} para sair. Compare estado, consumo de CPU e memória. Se \comando{iostat} estiver instalado (pacote \comando{sysstat}), use-o para observar estatísticas de dispositivos; caso contrário, faça a análise qualitativa solicitada.
+\begin{lstlisting}[language=bash,caption={Listagem de processos R e monitores interativos},label={lst:atividade61}]
+ps -eo pid=,comm=,state= | awk '$NF == "R" {print $1, $2}'
+top -d 2 -o %CPU
+top -d 2 -o %MEM
+# Opcional, se sysstat estiver instalado:
+iostat -xz 2 3
+\end{lstlisting}
+O primeiro comando imprime PID e nome somente quando o estado começa com R (inclui variantes como R+). Cada comando \comando{top} atualiza a tela a cada dois segundos e ordena por CPU ou memória. \comando{iostat} mostra atividade e latência de dispositivos em intervalos de dois segundos. Uma CPU ocupada pode decorrer de cálculo sem E/S; espera por disco pode aumentar estados de bloqueio e latências. Registre somente a relação observada no teste.
+\evidencia{images/atividade-6-1-processos.png}{Listagem de processos em estado R e observação de CPU, memória e E/S.}{fig:atividade61}
+
+\subsection{Atividade 6.2 -- Processo em segundo plano}
+\textbf{Objetivo.} Iniciar um processo em background, inspecionar sua relação com o shell e observar PID, PPID e a saída de \comando{jobs}.
+
+O exemplo usa \comando{sleep} para criar um processo controlável sem depender de um navegador instalado. Execute na mesma sessão interativa; ao final, encerre o processo de teste.
+\begin{lstlisting}[language=bash,caption={Processo em background e inspeção de PID/PPID},label={lst:atividade62}]
+sleep 600 &
+pid=$!
+printf 'PID do processo em background: %s\n' "$pid"
+ps -o pid,ppid,state,comm -p "$pid","$$"
+pstree -p "$$"
+jobs -l
+kill "$pid"
+\end{lstlisting}
+\comando{$!} guarda o PID do último processo iniciado em background e \comando{$$} identifica o shell atual. A coluna PPID de \comando{ps} permite comparar a relação pai-filho; \comando{jobs -l} lista trabalhos conhecidos por aquela sessão. A árvore pode incluir outros processos do ambiente.
+\evidencia{images/atividade-6-2-background.png}{Processo em background, árvore, PID/PPID e jobs na sessão do shell.}{fig:atividade62}
+
+\subsection{Atividade 6.3 -- Backup agendado com cron}
+\textbf{Objetivo.} Agendar para aproximadamente cinco minutos depois uma cópia compactada dos arquivos \comando{.log} diretamente em \comando{/var/log}.
+
+Cron tem precisão de um minuto. Execute a preparação logo antes da edição; o comando abaixo imprime uma linha de cron para o próximo horário calculado, usando o diretório pessoal real. Como a expressão cron não tem campo de ano, a linha voltaria a executar no mesmo dia e horário nos anos seguintes se não for removida. Exclua-a depois da execução.
+\begin{lstlisting}[language=bash,caption={Geração de uma entrada cron para cinco minutos à frente},label={lst:atividade63prep}]
+read -r minuto hora dia mes < <(date -d '+5 minutes' '+%M %H %d %m')
+destino="$HOME/backup_logs.tar.gz"
+printf '%s %s %s %s * tar -zcvf %q /var/log/*.log\n' \
+  "$minuto" "$hora" "$dia" "$mes" "$destino"
+\end{lstlisting}
+Copie a linha impressa, abra o editor e cole-a:
+\begin{lstlisting}[language=bash,caption={Edição e verificação do crontab},label={lst:atividade63}]
+crontab -e
+crontab -l
+\end{lstlisting}
+O comando \comando{tar -zcvf} cria e lista os arquivos do arquivo compactado no diretório pessoal. A conta precisa conseguir ler os arquivos selecionados e deve haver ao menos um arquivo \comando{.log} correspondente; caso contrário, o comando informa erro. Registre a mensagem e consulte o responsável pelo ambiente se necessário, sem elevar privilégios sem autorização. Depois do horário, confira o arquivo e seu conteúdo e remova a entrada temporária com \comando{crontab -e}.
+\begin{lstlisting}[language=bash,caption={Conferência do arquivo criado e remoção da tarefa temporária},label={lst:atividade63check}]
+ls -lh "$HOME/backup_logs.tar.gz"
+tar -tzf "$HOME/backup_logs.tar.gz"
+crontab -e
+\end{lstlisting}
+\evidencia{images/atividade-6-3-cron.png}{Linha de cron, confirmação do arquivo compactado e conteúdo do backup.}{fig:atividade63}
+
+\subsection{Atividade 6.4 -- Usuário, diretório e shell}
+\textbf{Objetivo.} Criar um script que informa usuário atual, diretório atual e shell de login registrado para a conta.
+\begin{lstlisting}[language=bash,caption={Criação e execução do script info.sh},label={lst:atividade64}]
+cat > info.sh <<'SCRIPT'
+#!/usr/bin/env bash
+usuario=$(id -un)
+diretorio=$(pwd)
+shell_login=$(getent passwd "$usuario" | cut -d ':' -f 7)
+printf 'Usuário atual: %s\n' "$usuario"
+printf 'Diretório atual: %s\n' "$diretorio"
+printf 'Shell de login: %s\n' "$shell_login"
+SCRIPT
+chmod u+x info.sh
+./info.sh
+\end{lstlisting}
+\comando{getent passwd} consulta a base de contas disponível. O script exibe o shell configurado para login, que pode ser diferente do interpretador de uma sessão iniciada manualmente.
+\evidencia{images/atividade-6-4-informacoes-usuario.png}{Execução de info.sh com usuário, diretório e shell visíveis.}{fig:atividade64}
+
+\subsection{Atividade 6.8 -- Validação do número de parâmetros}
+\textbf{Objetivo.} Verificar se o script recebe exatamente um argumento e encerrar com código diferente de zero em caso de uso incorreto.
+\begin{lstlisting}[language=bash,caption={Criação e testes de testaparametro.sh},label={lst:atividade68}]
+cat > testaparametro.sh <<'SCRIPT'
+#!/usr/bin/env bash
+if [ "$#" -ne 1 ]; then
+  echo "Uso: $0 <parametro>" >&2
+  exit 1
+fi
+printf 'Parâmetro recebido: %s\n' "$1"
+exit 0
+SCRIPT
+chmod u+x testaparametro.sh
+./testaparametro.sh
+printf 'status=%s\n' "$?"
+./testaparametro.sh exemplo
+printf 'status=%s\n' "$?"
+\end{lstlisting}
+\comando{$#} contém a quantidade de argumentos posicionais. O primeiro teste deve imprimir a mensagem de uso e retornar 1; o segundo deve exibir o valor fornecido e retornar 0. \comando{$?} lê o código de saída do comando imediatamente anterior.
+\evidencia{images/atividade-6-8-parametros.png}{Teste do script com zero e um parâmetro, incluindo os códigos de saída.}{fig:atividade68}
+
+\subsection{Atividade 6.9 -- Validação de diretório}
+\textbf{Objetivo.} Estender a validação anterior para exigir um único parâmetro que corresponda a um diretório existente.
+\begin{lstlisting}[language=bash,caption={Criação e testes de testedir.sh},label={lst:atividade69}]
+cat > testedir.sh <<'SCRIPT'
+#!/usr/bin/env bash
+if [ "$#" -ne 1 ]; then
+  echo "Uso: $0 <diretorio>" >&2
+  exit 1
+fi
+[[ -d "$1" ]]
+status=$?
+if [ "$status" -eq 0 ]; then
+  printf 'Diretório válido: %s\n' "$1"
+else
+  printf 'Não é um diretório válido: %s\n' "$1" >&2
+  exit 1
+fi
+SCRIPT
+chmod u+x testedir.sh
+./testedir.sh /tmp
+printf 'status=%s\n' "$?"
+./testedir.sh /caminho/inexistente
+printf 'status=%s\n' "$?"
+\end{lstlisting}
+O teste \comando{[[ -d "$1" ]]} retorna zero quando o argumento é um diretório e diferente de zero quando não é. O script guarda o retorno em \comando{status} antes de executar outros comandos, evitando que a consulta seja sobrescrita. O exemplo \comando{/tmp} existe em sistemas Linux usuais; substitua por outro diretório se necessário.
+\evidencia{images/atividade-6-9-diretorio.png}{Teste de um diretório existente e de um caminho que não é diretório válido.}{fig:atividade69}
+
+\subsection{Atividade 6.10 -- Arquivos iniciados por uma letra}
+\textbf{Objetivo.} Receber um diretório e uma letra, validar os argumentos e listar arquivos comuns cujo nome começa com essa letra.
+\begin{lstlisting}[language=bash,caption={Criação e teste de listar\_por\_letra.sh},label={lst:atividade610}]
+cat > listar_por_letra.sh <<'SCRIPT'
+#!/usr/bin/env bash
+if [ "$#" -ne 2 ] || [ -z "$1" ] || [ -z "$2" ]; then
+  echo "Uso: $0 <diretorio> <letra>" >&2
+  exit 1
+fi
+if [[ ! -d "$1" ]]; then
+  printf 'Diretório inválido: %s\n' "$1" >&2
+  exit 1
+fi
+if [[ ! "$2" =~ ^[[:alpha:]]$ ]]; then
+  echo "O segundo argumento deve ser uma única letra." >&2
+  exit 1
+fi
+find "$1" -maxdepth 1 -type f -name "$2*" -print
+SCRIPT
+chmod u+x listar_por_letra.sh
+./listar_por_letra.sh "$HOME" a
+\end{lstlisting}
+\comando{find} pesquisa somente no diretório informado, sem descer para subdiretórios, e imprime arquivos regulares cujo nome corresponde ao prefixo. A listagem depende dos arquivos existentes no local escolhido.
+\evidencia{images/atividade-6-10-arquivos.png}{Execução do script com diretório e letra válidos, mostrando a listagem obtida.}{fig:atividade610}
+
+\section{Capítulo 7 -- Shell Script}
+\subsection{Atividade 7.6 -- Busca de nome em uma agenda}
+\textbf{Objetivo.} Criar um arquivo texto com nome, sobrenome e telefone e um script que procura as linhas que contenham o termo informado.
+
+As entradas abaixo são fictícias e servem apenas para teste; substitua-as por dados apropriados. Não use dados pessoais sem autorização.
+\begin{lstlisting}[language=bash,caption={Criação de agenda de exemplo},label={lst:agenda}]
+cat > agenda <<'AGENDA'
+Ana Lima 0000-0000
+Bruno Reis 1111-1111
+Carla Souza 2222-2222
+AGENDA
+\end{lstlisting}
+Crie o script de busca e execute-o com um nome ou trecho:
+\begin{lstlisting}[language=bash,caption={Busca de termo na agenda},label={lst:atividade76}]
+cat > busca_agenda.sh <<'SCRIPT'
+#!/usr/bin/env bash
+if [ "$#" -ne 1 ]; then
+  echo "Uso: $0 <nome-ou-trecho>" >&2
+  exit 1
+fi
+if [ ! -r agenda ]; then
+  echo "O arquivo agenda não existe ou não pode ser lido." >&2
+  exit 1
+fi
+echo "Linhas encontradas:"
+grep -iF -- "$1" agenda
+SCRIPT
+chmod u+x busca_agenda.sh
+./busca_agenda.sh Ana
+\end{lstlisting}
+\comando{grep -iF} procura o texto sem diferenciar maiúsculas de minúsculas e trata o argumento literalmente. Se não houver correspondência, \comando{grep} não imprime linhas e retorna código 1.
+\evidencia{images/atividade-7-6-agenda.png}{Conteúdo de teste da agenda e resultado da busca pelo nome informado.}{fig:atividade76}
+
+\subsection{Atividade 7.9 -- Comparação de palavras e análise de arquivo}
+\textbf{Objetivo.} Implementar os dois itens: testar se a primeira palavra ocorre dentro da segunda e, separadamente, validar leitura de arquivo texto e contar caracteres, palavras e linhas.
+
+\subsubsection{Item 1 -- Uma palavra contida em outra}
+\begin{lstlisting}[language=bash,caption={Script contem\_palavra.sh},label={lst:atividade79a}]
+cat > contem_palavra.sh <<'SCRIPT'
+#!/usr/bin/env bash
+if [ "$#" -ne 2 ] || [ -z "$1" ] || [ -z "$2" ]; then
+  echo "Uso: $0 <palavra> <texto>" >&2
+  exit 1
+fi
+case "$2" in
+  *"$1"*) echo "A primeira palavra está contida na segunda." ;;
+  *) echo "A primeira palavra não está contida na segunda."; exit 1 ;;
+esac
+SCRIPT
+chmod u+x contem_palavra.sh
+./contem_palavra.sh sol girassol
+./contem_palavra.sh lua girassol
+\end{lstlisting}
+O script exige dois parâmetros e usa padrão do shell para verificar a ocorrência da primeira sequência na segunda. Os exemplos mostram um caso positivo e outro negativo; confirme mensagens e códigos de saída no terminal.
+
+\subsubsection{Item 2 -- Permissão de leitura e contagem com wc}
+\begin{lstlisting}[language=bash,caption={Script contar\_texto.sh},label={lst:atividade79b}]
+cat > contar_texto.sh <<'SCRIPT'
+#!/usr/bin/env bash
+if [ "$#" -ne 1 ]; then
+  echo "Uso: $0 <arquivo-texto>" >&2
+  exit 1
+fi
+arquivo=$1
+if [[ -f "$arquivo" && -r "$arquivo" ]]; then
+  echo "Linhas, palavras e caracteres (wc):"
+  wc -l -w -m -- "$arquivo"
+else
+  echo "Arquivo inexistente, não regular ou sem permissão de leitura." >&2
+  exit 1
+fi
+SCRIPT
+chmod u+x contar_texto.sh
+./contar_texto.sh agenda
+./contar_texto.sh /caminho/para/arquivo-inexistente.txt
+\end{lstlisting}
+\comando{wc -l -w -m} informa linhas, palavras e caracteres conforme codificação e localidade do ambiente. O teste \comando{-r} verifica se o usuário atual pode ler o arquivo; \comando{-f} exige um arquivo regular.
+\evidencia{images/atividade-7-9-palavras-e-wc.png}{Testes de inclusão de palavra e contagem de linhas, palavras e caracteres com wc.}{fig:atividade79}
+
+\subsection{Atividade 7.11 -- Menu de comandos}
+\textbf{Objetivo.} Exibir um menu para consultar partições, usuários logados ou data e hora, encerrar na opção 4 e informar opções inválidas.
+\begin{lstlisting}[language=bash,caption={Criação e execução de menu.sh},label={lst:atividade711}]
+cat > menu.sh <<'SCRIPT'
+#!/usr/bin/env bash
+while true; do
+  echo "1. Exibir status das partições (df -h)"
+  echo "2. Exibir usuários logados (who)"
+  echo "3. Exibir data/hora (date)"
+  echo "4. Sair"
+  if ! read -r -p "Escolha uma opção: " opcao; then
+    echo
+    exit 0
+  fi
+  case "$opcao" in
+    1) df -h ;;
+    2) who ;;
+    3) date ;;
+    4) echo "Encerrando."; break ;;
+    *) echo "Opção inválida. Digite um número de 1 a 4." ;;
+  esac
+  echo
+done
+SCRIPT
+chmod u+x menu.sh
+./menu.sh
+\end{lstlisting}
+Na mesma execução, digite as opções 1, 2, 3 e 4; teste também uma entrada inválida. \comando{df -h}, \comando{who} e \comando{date} são chamados pela opção escolhida. A opção 4 encerra o laço. Uma captura deve mostrar o menu, uma resposta válida, a validação de entrada inválida e a saída.
+\evidencia{images/atividade-7-11-menu.png}{Execução do menu com opções válidas, entrada inválida e encerramento.}{fig:atividade711}
+
+\section*{Glossário}
+\addcontentsline{toc}{section}{Glossário}
+\begin{description}[leftmargin=3.3cm,style=nextline]
+\item[DMA] Acesso direto à memória: transferência entre dispositivo e memória com pouca intervenção da CPU.
+\item[Driver] Módulo que permite ao sistema operacional controlar um dispositivo.
+\item[Escalonador] Componente que escolhe qual tarefa elegível recebe recursos do processador.
+\item[Filesystem] Sistema de arquivos; estrutura que organiza arquivos, diretórios e metadados.
+\item[GID] Identificador numérico de grupo no sistema.
+\item[Inode] Estrutura de metadados e referências a dados em sistemas de arquivos Unix.
+\item[MMU] Unidade de gerenciamento de memória que traduz endereços e aplica proteção.
+\item[PID / PPID] Identificador de processo / identificador do processo pai.
+\item[RAM] Memória de acesso aleatório usada como memória principal volátil.
+\item[Swap] Área de armazenamento usada para páginas de memória sob pressão de RAM.
+\item[UID] Identificador numérico de usuário no sistema.
+\item[UEFI] Interface de firmware que define serviços de inicialização e carregamento de aplicações EFI.
+\item[VFS] Camada virtual que apresenta interface comum para sistemas de arquivos diferentes.
+\end{description}
+
+\begin{thebibliography}{99}
+\addcontentsline{toc}{section}{Referências}
+\bibitem{arpaci} ARPACI-DUSSEAU, Remzi H.; ARPACI-DUSSEAU, Andrea C. \textit{Operating Systems: Three Easy Pieces}. Madison: Arpaci-Dusseau Books, 2018. Disponível em: \url{https://pages.cs.wisc.edu/~remzi/OSTEP/}. Registro bibliográfico pesquisável no Google Acadêmico: \url{https://scholar.google.com/scholar?q=Operating+Systems+Three+Easy+Pieces+Arpaci-Dusseau}. Acesso em: 21 nov. 2026.
+\bibitem{linuxblk} LINUX KERNEL DOCUMENTATION. \textit{Multi-Queue Block IO Queueing Mechanism (blk-mq)}. Disponível em: \url{https://docs.kernel.org/block/blk-mq.html}. Acesso em: 21 nov. 2026.
+\bibitem{love} LOVE, Robert. \textit{Linux Kernel Development}. 3. ed. Indianapolis: Addison-Wesley, 2010.
+\bibitem{nvme} NVM EXPRESS. \textit{NVM Express Base Specification}. Disponível em: \url{https://nvmexpress.org/specifications/}. Acesso em: 21 nov. 2026.
+\bibitem{patterson} PATTERSON, David A.; HENNESSY, John L. \textit{Computer Organization and Design: The Hardware/Software Interface}. 5. ed. Waltham: Morgan Kaufmann, 2014.
+\bibitem{rosenblum} ROSENBLUM, Mendel; OUSTERHOUT, John K. The design and implementation of a log-structured file system. \textit{ACM Transactions on Computer Systems}, v. 10, n. 1, p. 26--52, 1992. DOI: \url{https://doi.org/10.1145/146941.146943}. Pesquisa no Google Acadêmico: \url{https://scholar.google.com/scholar?q=The+Design+and+Implementation+of+a+Log-Structured+File+System+Rosenblum+Ousterhout}.
+\bibitem{silberschatz} SILBERSCHATZ, Abraham; GALVIN, Peter B.; GAGNE, Greg. \textit{Operating System Concepts}. 10. ed. Hoboken: Wiley, 2018.
+\bibitem{tanenbaum} TANENBAUM, Andrew S.; BOS, Herbert. \textit{Modern Operating Systems}. 4. ed. Boston: Pearson, 2015.
+\bibitem{uefi} UEFI FORUM. \textit{UEFI Specification, Version 2.11}. 2024. Disponível em: \url{https://uefi.org/specifications}. Especificação técnica primária. Acesso em: 21 nov. 2026.
+\end{thebibliography}
+\end{document}
